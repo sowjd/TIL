@@ -6,7 +6,7 @@
 * 로그 쿼리 `key:value`로 검색
 * key 예시: tag, package, process, message, level, age
   > tag, process, message를 많이 쓸 듯!
-* 정규식 작성 가능
+* 정규식 작성 가능  
 참고 https://developer.android.com/studio/debug/logcat?hl=ko
 
 ## Jetpack Compose
@@ -52,7 +52,8 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     )
 }
 
-// @Preview annotation: 미리보기 함수
+// @Preview annotation: 앱을 build 하거나 install 하지 않고 미리 볼 수 있게 해준다.
+// 조건: 파라미터가 없는 composable function여야 한다.
 // showBackground = true라는 매개변수를 사용하고 있는데 미리보기에 배경을 추가하라는 뜻이다
 @Preview(showBackground = true)
 @Composable
