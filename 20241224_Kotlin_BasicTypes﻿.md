@@ -28,6 +28,12 @@ val oneByte: Byte = 1
 
 Compiler는 기본적으로 `Double`로 추론한다.  
 `Float`으로 지정하고 싶다면 `F` 또는 `f`를 붙인다.
+```kotlin
+println(9/5) // 1
+println(9.0/5) // 1.8
+println(9/5.0) // 1.8
+println(9.0/5.0) // 1.8
+```
 
 ### Numbers representation on the JVM
 JVM에서 number는 primitive type(`int`, `double` 등)으로 저장된다.  
