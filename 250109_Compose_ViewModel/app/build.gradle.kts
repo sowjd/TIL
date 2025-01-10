@@ -64,6 +64,12 @@ android {
 }
 
 dependencies {
+    /*
+    Compose BOM
+    - Compose 라이브러리(androidx.compose.*) 버전을 관리하는 데 권장되는 방법
+    - BOM 버전만 지정하면 Compose 라이브러리의 최신 안정화 버전을 가져온다.
+    - 컴포즈 라이브러리에 버전이 정의 되지 않았다는 것을 볼 수 있다.
+     */
     implementation(platform("androidx.compose:compose-bom:2024.12.01"))
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.compose.material3:material3")
@@ -78,4 +84,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+
+    //  Unit test code가 APK에 포함되지 않게 하기 위해 testImplementation을 사용한다.
+    testImplementation("junit:junit:4.13.2")
 }
