@@ -36,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,6 +52,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.racetracker.R
 import com.example.racetracker.ui.theme.RaceTrackerTheme
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun RaceTrackerApp() {
@@ -67,6 +70,23 @@ fun RaceTrackerApp() {
     }
     var raceInProgress by remember { mutableStateOf(false) }
 
+    if (raceInProgress) { // Start 버튼을 클릭해야 시작됨
+        // 1. Suspend function은 다른 suspend function에서만 호출될 수 있다.
+        // 2. Composable 안에서 suspend function을 안전하게 호출하기 위해서
+        //    LaunchedEffect() composable을 사용해야 한다.
+        // 3. Composition에 있는한 계속 실행된다.
+        // 4. playerOne, playerTwo를 LaunchedEffect의 key로 등록하여
+        //    해당 객체가 변경되면 underlying 코루틴이 종료되고, 다시 lanch 된다.
+        LaunchedEffect(playerOne, playerTwo) {
+            coroutineScope {
+                // playerOne과 playerTwo가 동시에 시작하기 위해 launch 빌더 사용
+                launch { playerOne.run() }
+                launch { playerTwo.run() }
+            } // playerOne과 playerTwo가 모두 레이스를 완료한 후
+            // raceInProgress를 false로 업데이트 하기 위해 coroutineScope를 사용
+            raceInProgress = false // 레이스 완료
+        }
+    }
     RaceTrackerScreen(
         playerOne = playerOne,
         playerTwo = playerTwo,
@@ -146,6 +166,7 @@ private fun RaceTrackerScreen(
     }
 }
 
+// 플레이어의 진행 상태를 표시
 @Composable
 private fun StatusIndicator(
     participantName: String,
@@ -202,12 +223,15 @@ private fun RaceControls(
         verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_medium))
     ) {
         Button(
+            // Start 클릭: 달리기 시작, 코루틴 실행
+            // Pause 클릭: 달리기 일시중지, 코루틴 취소
             onClick = { onRunStateChange(!isRunning) },
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(if (isRunning) stringResource(R.string.pause) else stringResource(R.string.start))
         }
         OutlinedButton(
+            // Reset 클릭: 달리기 중지, 코루틴 취소
             onClick = onReset,
             modifier = Modifier.fillMaxWidth(),
         ) {
