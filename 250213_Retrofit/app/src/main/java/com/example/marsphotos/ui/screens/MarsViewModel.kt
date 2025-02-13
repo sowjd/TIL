@@ -21,7 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.marsphotos.network.MarsApi
+import com.example.marsphotos.data.NetworkMarsPhotosRepository
 import kotlinx.coroutines.launch
 import java.io.IOException
 
@@ -52,7 +52,11 @@ class MarsViewModel : ViewModel() {
         // ViewModel이 삭제되면 자동으로 취소된다.
         viewModelScope.launch {
             try {
-                val listResult = MarsApi.retrofitService.getPhotos()
+                // MarsViewModel -> data 였는데 (화살표는 참조라는 뜻)
+                // MarsViewModel -> MarsPhotosRepository -> data로 바꿈
+                // 데이터를 가져오는 코드가 ViewModel과의 결합도가 느슨해짐
+                val marsPhotosRepository = NetworkMarsPhotosRepository()
+                val listResult = marsPhotosRepository.getMarsPhotos()
                 marsUiState = MarsUiState.Success(
                     "Success: ${listResult.size} Mars photos retrieved"
                 ) // 서버에서 받은 결과를 저장
