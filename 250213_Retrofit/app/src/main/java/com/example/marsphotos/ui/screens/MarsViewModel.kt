@@ -25,9 +25,15 @@ import com.example.marsphotos.network.MarsApi
 import kotlinx.coroutines.launch
 import java.io.IOException
 
+sealed interface MarsUiState {
+    data class Success(val photos: String) : MarsUiState
+    object Error : MarsUiState
+    object Loading : MarsUiState
+}
+
 class MarsViewModel : ViewModel() {
     /** The mutable State that stores the status of the most recent request */
-    var marsUiState: String by mutableStateOf("")
+    var marsUiState: MarsUiState by mutableStateOf(MarsUiState.Loading)
         private set
 
     /**
@@ -42,15 +48,16 @@ class MarsViewModel : ViewModel() {
      * [MarsPhoto] [List] [MutableList].
      */
     fun getMarsPhotos() {
-        try {
-            // viewModelScope: ViewModel에 정의된 기본 코루틴 스코프
-            // ViewModel이 삭제되면 자동으로 취소된다.
-            viewModelScope.launch {
+        // viewModelScope: ViewModel에 정의된 기본 코루틴 스코프
+        // ViewModel이 삭제되면 자동으로 취소된다.
+        viewModelScope.launch {
+            try {
                 val listResult = MarsApi.retrofitService.getPhotos()
-                marsUiState = listResult // 서버에서 받은 결과를 저장
+                marsUiState = MarsUiState.Success(listResult) // 서버에서 받은 결과를 저장
+            } catch (e: IOException) {
+//            Log.d("Jenny", "Fail to get photos. error: " + e.message)
+                marsUiState = MarsUiState.Error
             }
-        } catch (e: IOException) {
-            Log.d("Jenny", "Fail to get photos. error: " + e.message)
         }
     }
 }
