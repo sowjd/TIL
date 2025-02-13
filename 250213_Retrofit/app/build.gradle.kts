@@ -18,6 +18,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.1.10"
 }
 
 android {
@@ -77,8 +78,12 @@ dependencies {
 
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    // Retrofit with Scalar Converter: JSON -> String으로 변환
-    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
+    // Kotlin serialization: 서버에서 받은 JSON 응답을 Kotlin 객체로 파싱
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+    // Retrofit with Kotlin serialization Converter
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+
 
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     debugImplementation("androidx.compose.ui:ui-tooling")
