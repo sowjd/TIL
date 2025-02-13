@@ -15,10 +15,15 @@
  */
 package com.example.marsphotos.ui.screens
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.marsphotos.network.MarsApi
+import kotlinx.coroutines.launch
+import java.io.IOException
 
 class MarsViewModel : ViewModel() {
     /** The mutable State that stores the status of the most recent request */
@@ -37,6 +42,15 @@ class MarsViewModel : ViewModel() {
      * [MarsPhoto] [List] [MutableList].
      */
     fun getMarsPhotos() {
-        marsUiState = "Set the Mars API status response here!"
+        try {
+            // viewModelScope: ViewModel에 정의된 기본 코루틴 스코프
+            // ViewModel이 삭제되면 자동으로 취소된다.
+            viewModelScope.launch {
+                val listResult = MarsApi.retrofitService.getPhotos()
+                marsUiState = listResult // 서버에서 받은 결과를 저장
+            }
+        } catch (e: IOException) {
+            Log.d("Jenny", "Fail to get photos. error: " + e.message)
+        }
     }
 }
