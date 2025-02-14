@@ -1,6 +1,6 @@
 package com.example.marsphotos.data
 
-import com.example.marsphotos.network.MarsApi
+import com.example.marsphotos.network.MarsApiService
 import com.example.marsphotos.network.MarsPhoto
 
 /*
@@ -18,12 +18,19 @@ Data Layer: https://developer.android.com/topic/architecture/data-layer
 - 저장소 이름 규칙: 데이터 유형 + 저장소
  */
 
-interface MarsPhotosRepository {
+interface MarsPhotosRepository { // 데이터 소스를 추상화하는 저장소 클래스
     suspend fun getMarsPhotos(): List<MarsPhoto>
 }
 
-class NetworkMarsPhotosRepository() : MarsPhotosRepository {
-    override suspend fun getMarsPhotos(): List<MarsPhoto> {
-        return MarsApi.retrofitService.getPhotos()
-    }
+class NetworkMarsPhotosRepository(
+    private val marsApiService: MarsApiService
+) : MarsPhotosRepository {
+    override suspend fun getMarsPhotos(): List<MarsPhoto> = marsApiService.getPhotos()
+    // 위 코드는 표현식 함수(Expression Body Function)인데 Java에 없는 문법이다.
+    // (Java에서 람다 표현식으로 비슷하게 작성 가능하긴 하다)
+    // 풀어서 쓴다면 이래와 같다.
+    //    override suspend fun getMarsPhotos(): List<MarsPhoto> {
+    //        return marsApiService.getPhotos()
+    //    }
+    // 함수 바디가 단일 표현식(한 줄)일 때만 가능하다.
 }

@@ -46,7 +46,21 @@ fun MarsPhotosApp() {
         Surface(
             modifier = Modifier.fillMaxSize()
         ) {
-            val marsViewModel: MarsViewModel = viewModel()
+            // 1.
+            // Android의 ViewModel은 new ViewModel(...)로 생성하는 것이 아니라
+            // Android Framework(ViewModelProvider)에 의해 자동으로 생성되고 관리된다.
+            // viewModels()를 사용하면 ViewModelProvider가 ViewModel을 생성하고 관리한다.
+            // 만약 ViewModel을 생성할때 constructor에 값을 전달하기 위해선
+            // ViewModel Factory를 사용해야 한다.
+            val marsViewModel: MarsViewModel = viewModel(
+                factory = MarsViewModel.Factory
+            )
+            // 2.
+            // val viewModel: MarsViewModel by viewModels { MarsViewModel.Factory } 와의 차이
+            // 두 코드 다 ViewModel을 생성하지만
+            // 2는 Activity/Fragment 라이프사이클을 따라가고
+            // 1은 Compose composition을 따라간다.
+
             HomeScreen(
                 marsUiState = marsViewModel.marsUiState,
                 contentPadding = it,

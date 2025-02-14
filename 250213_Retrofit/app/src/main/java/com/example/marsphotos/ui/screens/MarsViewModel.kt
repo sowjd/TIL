@@ -15,13 +15,17 @@
  */
 package com.example.marsphotos.ui.screens
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import com.example.marsphotos.data.NetworkMarsPhotosRepository
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.marsphotos.MarsPhotosApplication
+import com.example.marsphotos.data.MarsPhotosRepository
 import kotlinx.coroutines.launch
 import java.io.IOException
 
@@ -31,7 +35,11 @@ sealed interface MarsUiState {
     object Loading : MarsUiState
 }
 
-class MarsViewModel : ViewModel() {
+class MarsViewModel(
+    // Constructor parameter 추가
+    // ViewModelProvider.Factory를 사용하여 application container에서 값을 가져온다.
+    private val marsPhotosRepository: MarsPhotosRepository
+) : ViewModel() {
     /** The mutable State that stores the status of the most recent request */
     var marsUiState: MarsUiState by mutableStateOf(MarsUiState.Loading)
         private set
@@ -52,10 +60,6 @@ class MarsViewModel : ViewModel() {
         // ViewModel이 삭제되면 자동으로 취소된다.
         viewModelScope.launch {
             try {
-                // MarsViewModel -> data 였는데 (화살표는 참조라는 뜻)
-                // MarsViewModel -> MarsPhotosRepository -> data로 바꿈
-                // 데이터를 가져오는 코드가 ViewModel과의 결합도가 느슨해짐
-                val marsPhotosRepository = NetworkMarsPhotosRepository()
                 val listResult = marsPhotosRepository.getMarsPhotos()
                 marsUiState = MarsUiState.Success(
                     "Success: ${listResult.size} Mars photos retrieved"
@@ -63,6 +67,23 @@ class MarsViewModel : ViewModel() {
             } catch (e: IOException) {
 //            Log.d("Jenny", "Fail to get photos. error: " + e.message)
                 marsUiState = MarsUiState.Error
+            }
+        }
+    }
+
+    companion object { // companion? -> static이다 로 외워버려!
+        // Factory: 변수명
+        // ViewModelProvider.Factory: 타입
+        // viewModelFactory {}: lifecycle-viewmodel-compose 라이브러리에서 제공하는 ViewModel Factory 생성 함수
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer { // ViewModel을 어떻게 생성할지 정의
+                // this[APPLICATION_KEY]: 현재 ViewModelStoreOwner에서 Application 객체를 가져옴
+                // as MarsPhotosApplication: 가져온 Application 객체를 MarsPhotosApplication 타입으로 변환
+                val application = (this[APPLICATION_KEY] as MarsPhotosApplication)
+                // application.container: onCreate()에서 미리 생성된 Dependency Container
+                val marsPhotosRepository = application.container.marsPhotosRepository
+                // marsPhotosRepository를 constructor의 argument로 넘겨줌
+                MarsViewModel(marsPhotosRepository = marsPhotosRepository)
             }
         }
     }
