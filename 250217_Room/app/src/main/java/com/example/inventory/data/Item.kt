@@ -16,11 +16,17 @@
 
 package com.example.inventory.data
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
 /**
  * Entity data class represents a single row in the database.
  */
-class Item(
+// Data 클래스
+// 컴파일러는 toString(), copy(), equals()와 같은 비교, 출력, 복사를 위한 유틸리티를 자동으로 생성
+@Entity(tableName = "items") // Table 이름을 items로 설정함
+data class Item(
+    @PrimaryKey(autoGenerate = true) // 자동생성, 값을 할당하지 않아도 됨
     val id: Int = 0,
     val name: String,
     val price: Double,

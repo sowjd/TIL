@@ -21,12 +21,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.inventory.data.Item
+import com.example.inventory.data.ItemsRepository
 import java.text.NumberFormat
 
 /**
  * ViewModel to validate and insert items in the Room database.
  */
-class ItemEntryViewModel : ViewModel() {
+class ItemEntryViewModel(private val itemsRepository: ItemsRepository) : ViewModel() {
 
     /**
      * Holds current item ui state
@@ -43,9 +44,16 @@ class ItemEntryViewModel : ViewModel() {
             ItemUiState(itemDetails = itemDetails, isEntryValid = validateInput(itemDetails))
     }
 
+    // name, price, quantity가 공백이 아니고 비어있지 않은지 확인하는 함수
     private fun validateInput(uiState: ItemDetails = itemUiState.itemDetails): Boolean {
         return with(uiState) {
             name.isNotBlank() && price.isNotBlank() && quantity.isNotBlank()
+        }
+    }
+
+    suspend fun saveItem() { // DB에 추가
+        if (validateInput()) {
+            itemsRepository.insertItem(itemUiState.itemDetails.toItem())
         }
     }
 }
@@ -70,7 +78,7 @@ data class ItemDetails(
  * not a valid [Double], then the price will be set to 0.0. Similarly if the value of
  * [ItemDetails.quantity] is not a valid [Int], then the quantity will be set to 0
  */
-fun ItemDetails.toItem(): Item = Item(
+fun ItemDetails.toItem(): Item = Item( // ItemUiState (UI State) -> Item (Room Entity)
     id = id,
     name = name,
     price = price.toDoubleOrNull() ?: 0.0,
@@ -84,6 +92,7 @@ fun Item.formatedPrice(): String {
 /**
  * Extension function to convert [Item] to [ItemUiState]
  */
+// Item (Room Entity) -> ItemUiState (UI State)
 fun Item.toItemUiState(isEntryValid: Boolean = false): ItemUiState = ItemUiState(
     itemDetails = this.toItemDetails(),
     isEntryValid = isEntryValid
@@ -92,6 +101,7 @@ fun Item.toItemUiState(isEntryValid: Boolean = false): ItemUiState = ItemUiState
 /**
  * Extension function to convert [Item] to [ItemDetails]
  */
+// Item (Room Entity) -> toItemDetails
 fun Item.toItemDetails(): ItemDetails = ItemDetails(
     id = id,
     name = name,
